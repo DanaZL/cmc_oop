@@ -1,3 +1,20 @@
+def date_sum(date_1, date_2):
+    hour = (date_1[1] + date_2[1]) % 24
+    day = date_1[0] + date_2[0] + ((date_1[1] + date_2[1]) / 24)
+    return (hour, day)
+
+
+class Experiment():
+    def __init__(self, cnt_department,
+                exp_period):
+        self.cnt_department = cnt_department
+        self.experiment_period = exp_period
+
+    def start_experiment(self):
+        self.secretary = Secretary()
+
+
+
 
 class Secretary():
     def __init__(self):
@@ -21,12 +38,15 @@ class Secretary():
                 event_id = i
                 self.event_ids.add(i)
                 break
+        new_event = Event(start_time, duration,
+                        room, participants,
+                        priority, name)
+
+    def generate_begin_events(self):
+        pass
 
 
-
-secretary = Secretary()
-
-def Event():
+class Event():
     def __init__(self,
                  start_time,
                  duration,
@@ -34,4 +54,17 @@ def Event():
                  participants,
                  priority,
                  name,
+                 event_id
                  ):
+        self.star_time = start_time
+        self.duration = duration
+        self.end_time = date_sum(start_time, duration)
+
+        self.room = room
+        self.participants = participants
+        self.priority = priority
+        self.name = name
+        self.event_id = event_id
+
+
+
