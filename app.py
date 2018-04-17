@@ -5,8 +5,9 @@ from toga.constants import COLUMN, ROW
 from toga.style.pack import *
 
 label_style = Pack(flex=1, padding_right=24)
-box_style = Pack(direction=ROW, padding=10)
+box_style = Pack(direction=ROW, padding=5)
 slider_style = Pack(flex=1)
+schedule_style= Pack(flex=1, width=450)
 
 def button_handler(widget):
     print('button handler')
@@ -35,7 +36,12 @@ def action4(widget):
     print("CALLING Action 4")
     cmd3.enabled = not cmd3.enabled
 
+
 class SecretaryApp(toga.App):
+    def start_experiment(self, widget):
+        self.exp_duration.enabled = False
+        self.cnt_department.enabled = False
+
     def icon_init(self):
         path = os.path.dirname(os.path.abspath(__file__))
         self.brutus_icon = os.path.join(path, "icons", "brutus.icns")
@@ -43,32 +49,39 @@ class SecretaryApp(toga.App):
         self.step_icon = os.path.join(path, "")
 
     def build_schedule(self):
-        tree = toga.Tree(['Schedule'], )
+        tree = toga.Tree(['Номер события', 'Название события', 'Помещение', 'Периодичность', 'Участники'],
+                        style=schedule_style)
         # print(dir(tree))
-        tree.data.append(None, None, 'root1')
-        root2 = tree.data.append(None, None, 'root2')
-        tree.data.append(root2, None, 'root2.1')
-        root2_2 = tree.data.append(root2, None, 'root2.2')
-        tree.data.append(root2_2, None, 'root2.2.1')
-        tree.data.append(root2_2, None, 'root2.2.2')
-        tree.data.append(root2_2, None, 'root2.2.3')
+        tree.data.append(None, None, None, None,  None,'root1')
+        root2 = tree.data.append(None, None,None, None, None, 'root2')
+        tree.data.append(root2, None, None, None, None, 'root2.1')
+        root2_2 = tree.data.append(root2, None, None, None, None,'root2.2')
+        tree.data.append(root2_2, None, None, None, None, 'root2.2.1')
+        tree.data.append(root2_2, None, None, None, None, 'root2.2.2')
+        tree.data.append(root2_2, None, None, None, None, 'root2.2.3')
         return tree
 
     def build_settings(self):
+        self.exp_duration = toga.Selection(items=[str(i) for i in range(7, 32)])
+        self.cnt_department = toga.Selection(items=[str(i) for i in range(5, 10)])
+        progress = toga.ProgressBar(max=100, value=1, style=Pack(padding_top=20))
+
         settings_box = toga.Box(
                 children=[
                     toga.Box(style=box_style, children=[
                         toga.Label("Период моделирования",
                             style=label_style),
-                        toga.Slider(range=(7, 31), default=14, style=Pack(width=100)),
+                        self.exp_duration
                     ]),
 
                     toga.Box(style=box_style, children=[
                         toga.Label("Количество отделов",
                             style=label_style),
-
-                        toga.Slider(range=(5, 10), default=7, style=Pack(width=100)),
-                    ])
+                        self.cnt_department
+                    ]),
+                    toga.Button('Начать моделирование', on_press=self.start_experiment, 
+                                style=Pack(flex=1, width=250, alignment='right')),
+                    progress
                 ],
                 style=Pack(direction=COLUMN, padding=24)
         )
@@ -76,7 +89,7 @@ class SecretaryApp(toga.App):
 
     def startup(self):
         self.icon_init()
-        self.main_window = toga.MainWindow(title=self.name, size=(700, 500))
+        self.main_window = toga.MainWindow(title=self.name, size=(1500, 900))
 
         tree = self.build_schedule()
         right_container = toga.ScrollContainer(horizontal=False)
@@ -85,52 +98,14 @@ class SecretaryApp(toga.App):
         right_container.content = self.build_settings()
 
         split = toga.SplitContainer()
-
         split.content = [tree, right_container]
 
+        # split = toga.Box(style=box_style, children=[tree, right_container]) 
+
         self.main_window.content = split
-
-        things = toga.Group('Things')
-
-        cmd0 = toga.Command(
-            action1,
-            label='Action 0',
-            tooltip='Perform action 0',
-            icon=self.brutus_icon,
-            group=things
-        )
-        cmd1 = toga.Command(
-            action1,
-            label='Action 1',
-            tooltip='Perform action 1',
-            icon=self.brutus_icon,
-            group=things
-        )
-        cmd2 = toga.Command(
-            action2,
-            label='Action 2',
-            tooltip='Perform action 2',
-            icon=toga.Icon.TIBERIUS_ICON,
-            group=things
-        )
-        cmd3 = toga.Command(
-            action3,
-            label='Action 3',
-            tooltip='Perform action 3',
-            shortcut='k',
-            icon=self.cricket_icon
-        )
-
-        cmd4 = toga.Command(
-            action4,
-            label='Action 4',
-            tooltip='Perform action 4',
-            icon=self.brutus_icon
-        )
-
         self.main_window.show()
 
-
+8
 def main():
     return SecretaryApp('Secretary', '42')
 
