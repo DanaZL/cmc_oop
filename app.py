@@ -79,6 +79,12 @@ class SecretaryApp(toga.App):
                             style=label_style),
                         self.cnt_department
                     ]),
+
+                    toga.Box(style=box_style, children=[
+                        toga.Label("Шаг моделирования",
+                            style=label_style),
+                        self.cnt_department
+                    ]),
                     toga.Button('Начать моделирование', on_press=self.start_experiment, 
                                 style=Pack(flex=1, width=250, alignment='right')),
                     progress
@@ -105,7 +111,7 @@ class SecretaryApp(toga.App):
         self.main_window.content = split
         self.main_window.show()
 
-8
+
 def main():
     return SecretaryApp('Secretary', '42')
 
