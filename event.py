@@ -1,5 +1,6 @@
 from tools import date_compare
 
+
 class Event():
     def __init__(self,
                  start_time,
@@ -11,6 +12,7 @@ class Event():
                  frequency,
                  event_id):
         """
+        frequency:
         Одноразовое - 0; Ежедневное - 1; Еженедельное - 2 
         """
         self.start_time = start_time
@@ -33,7 +35,7 @@ class Event():
             cur_day += 1
 
         events = []
-        if self.frequency == 0 and date_compare(cur_time, self.start_time):
+        if self.frequency == 0 and date_compare(cur_time, self.start_time) >= 0:
             return [self]
         if self.frequency == 1:
             for day in range(cur_day, experiment_period):
@@ -49,9 +51,7 @@ class Event():
         return events
 
 
-
     def is_conflict(self, other_event):
-        #TODO  добавить проверку на текущее время!!!
         if is_date_intersetction(self.start_time, self.duration,
                                 other_event.start_time, other_event.duration):
             if self.room == other_event.room:
@@ -59,3 +59,24 @@ class Event():
             if len(set(self.participants).intersection(other_event.participants)) > 0:
                 return (True, 'participants')
         return False
+
+
+    def __str__(self):
+        return self.name
+
+    def get_description(self):
+        end_time = date_sum(self.start_time, self.duration)
+        date = "{}день {}.00 -\n {}день {}.00".format(str(self.start_time[0]),
+                                              str(self.start_time[1]),
+                                              str(self.end_time[0]),
+                                              str(self.end_time[1]))
+
+        # Одноразовое - 0; Ежедневное - 1; Еженедельное - 2
+        if self.frequency == 0:
+            freq = "-"
+        elif self.frequency == 1:
+            freq = "Ежедневное"
+        else:
+            freq = "Еженедельное"
+
+        return [date, freq]

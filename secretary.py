@@ -1,4 +1,5 @@
 from tools import date_sum, date_compare
+import operator
 
 class Secretary():
     def __init__(self, experiment_period, cnt_department, departments):
@@ -17,14 +18,13 @@ class Secretary():
         self.cur_time = date_sum(self.cur_time, (0, self.cnt_step))
         for event_idx, event in enumerate(self.schedule):
             end_time = date_sum(event.start_time + event.duration)
-            if date_compare(end_time, self.cur_time) > 0:
+            if date_compare(end_time, self.cur_time) < 0:
                 self.schedule.pop(event_idx)
 
 
-    def calculate_schedule(self):
-        self.schedule = []
-        pass
-
+    def sort_schedule(self):
+        schedule.sort(self.schedule, 
+                               key = (lambda x: x[0] * 24 + x[1], x.cur_time))
 
     def check_conflicts(self, event):
         """
@@ -35,7 +35,7 @@ class Secretary():
             is_conflict = exist_event.is_conflict(event)
             if not is_conflict:
                 continue
-            return (is_conflict[1], exist_event)
+            return (False, exist_event)
         return True
 
 
@@ -47,6 +47,7 @@ class Secretary():
                   priority,
                   frequency,
                   name):
+
         for i in range(max(self.event_ids) + 2):
             if i not in self.event_ids:
                 event_id = i
@@ -65,7 +66,16 @@ class Secretary():
 
         is_conflict = False
         for ev in real_events:
-            check_conflicts()
+            conflict = self.check_conflicts(ev)
+            if conflict == True:
+                continue
+            else:
+              print "Конфликт события {0} с событием {1}, уже существующем в календаре" %\
+              format(str(ev), str(self)) 
+              is_conflict = True
+              break
+        if not is_conflict:
+            self.schedule.extend(real_events)
 
 
     def generate_init_events(self):
@@ -79,3 +89,5 @@ class Secretary():
                             priority=1,
                             frequency=1,
                             name="Ежедневная планерка отдела " + self.departments[i].id)
+
+        self.sort_schedule()

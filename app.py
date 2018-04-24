@@ -61,6 +61,20 @@ class SecretaryApp(toga.App):
         tree.data.append(root2_2, None, None, None, None, 'root2.2.3')
         return tree
 
+    def build_table(self, schedule):
+        tree = toga.Tree(['Время', 'Номер события', 'Название события',\
+                          'Помещение', 'Периодичность', 'Участники'],
+                        style=schedule_style)
+
+        for event in schedule:
+            description = event.get_description()
+            event_row = tree.data.append(None, description[0], str(event.event_id),
+                            event.name, str(event.room), description[1], 
+                            "...")
+            for worker in event.participants:
+                tree.data.append(event_row, "", "", "", "", "", worker)
+
+
     def build_settings(self):
         self.exp_duration = toga.Selection(items=[str(i) for i in range(7, 32)])
         self.cnt_department = toga.Selection(items=[str(i) for i in range(5, 10)])
