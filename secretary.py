@@ -1,3 +1,5 @@
+from tools import date_sum, date_compare
+
 class Secretary():
     def __init__(self, experiment_period, cnt_department, departments):
         #time: pair: (day, hour)
@@ -8,6 +10,16 @@ class Secretary():
         self.event_ids = set()
         self.cnt_department = cnt_department
         self.departments = departments
+        self.experiment_period = experiment_period
+
+
+    def self.step(self, cnt_step):
+        self.cur_time = date_sum(self.cur_time, (0, self.cnt_step))
+        for event_idx, event in enumerate(self.schedule):
+            end_time = date_sum(event.start_time + event.duration)
+            if date_compare(end_time, self.cur_time) > 0:
+                self.schedule.pop(event_idx)
+
 
     def calculate_schedule(self):
         self.schedule = []
@@ -48,11 +60,12 @@ class Secretary():
                           frequency=frequency,
                           name=name)
 
-        real_events = new_event.deploy_frequency()
+        real_events = new_event.deploy_frequency(self.experiment_period,
+                                                 self.cur_time)
 
         is_conflict = False
         for ev in real_events:
-
+            check_conflicts()
 
 
     def generate_init_events(self):

@@ -3,7 +3,14 @@ def date_sum(date_1, date_2):
     day = date_1[0] + date_2[0] + ((date_1[1] + date_2[1]) / 24)
     return (hour, day)
 
-def is_date_intersect(strart_date_1, duration_1, start_date_2, duration_2):
+def date_compare(date_1, date_2):
+	"""
+	Сравнение двух дат:
+	+1 - date_1 раньше date_2
+	-1 - date_1 позже date_2
+	"""
+
+def is_date_intersection(strart_date_1, duration_1, start_date_2, duration_2):
 	start_1 = date_1[0] * 24 + date_1[1]
 	start_2 = date_2[0] * 24 + date_2[1]
 
