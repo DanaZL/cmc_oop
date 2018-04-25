@@ -3,6 +3,8 @@ import os
 import toga
 from toga.constants import COLUMN, ROW
 from toga.style.pack import *
+from experiment import Experiment
+from secretary import Secretary
 
 label_style = Pack(flex=1, padding_right=24)
 box_style = Pack(direction=ROW, padding=5)
@@ -41,6 +43,12 @@ class SecretaryApp(toga.App):
     def start_experiment(self, widget):
         self.exp_duration.enabled = False
         self.cnt_department.enabled = False
+        self.experiment = Experiment(int(self.cnt_department.value),
+                                    int(self.exp_duration.value))
+        schedule = self.experiment.start_experiment()
+        print(schedule)
+        self.build_table(schedule)
+
 
     def icon_init(self):
         path = os.path.dirname(os.path.abspath(__file__))
@@ -49,30 +57,33 @@ class SecretaryApp(toga.App):
         self.step_icon = os.path.join(path, "")
 
     def build_schedule(self):
-        tree = toga.Tree(['Номер события', 'Название события', 'Помещение', 'Периодичность', 'Участники'],
+        self.tree = toga.Tree(['Номер события', 'Название события', 'Помещение', 'Периодичность', 'Участники'],
                         style=schedule_style)
         # print(dir(tree))
-        tree.data.append(None, None, None, None,  None,'root1')
-        root2 = tree.data.append(None, None,None, None, None, 'root2')
-        tree.data.append(root2, None, None, None, None, 'root2.1')
-        root2_2 = tree.data.append(root2, None, None, None, None,'root2.2')
-        tree.data.append(root2_2, None, None, None, None, 'root2.2.1')
-        tree.data.append(root2_2, None, None, None, None, 'root2.2.2')
-        tree.data.append(root2_2, None, None, None, None, 'root2.2.3')
-        return tree
+        self.tree.data.append(None, None, None, None,  None,'root1')
+        root2 = self.tree.data.append(None, None,None, None, None, 'root2')
+        self.tree.data.append(root2, None, None, None, None, 'root2.1')
+        root2_2 = self.tree.data.append(root2, None, None, None, None,'root2.2')
+        self.tree.data.append(root2_2, None, None, None, None, 'root2.2.1')
+        self.tree.data.append(root2_2, None, None, None, None, 'root2.2.2')
+        self.tree.data.append(root2_2, None, None, None, None, 'root2.2.3')
+        return self.tree
 
     def build_table(self, schedule):
-        tree = toga.Tree(['Время', 'Номер события', 'Название события',\
+        self.tree.refresh()
+        self.tree = toga.Tree(['Время', 'Номер события', 'Название события',\
                           'Помещение', 'Периодичность', 'Участники'],
                         style=schedule_style)
 
         for event in schedule:
             description = event.get_description()
-            event_row = tree.data.append(None, description[0], str(event.event_id),
+            event_row = self.tree.data.append(None, description[0], str(event.event_id),
                             event.name, str(event.room), description[1], 
                             "...")
             for worker in event.participants:
-                tree.data.append(event_row, "", "", "", "", "", worker)
+                self.tree.data.append(event_row, "", "", "", "", "", worker)
+        print(self.tree)
+        # return self.tree
 
 
     def build_settings(self):
@@ -111,15 +122,17 @@ class SecretaryApp(toga.App):
         self.icon_init()
         self.main_window = toga.MainWindow(title=self.name, size=(1500, 900))
 
-        tree = self.build_schedule()
+        self.tree = self.build_schedule()
+        self.tree.refresh()
         right_container = toga.ScrollContainer(horizontal=False)
 
         # right_container.content = right_content
         right_container.content = self.build_settings()
 
         split = toga.SplitContainer()
-        split.content = [tree, right_container]
+        split.content = [self.tree, right_container]
 
+        print(self.tree)
         # split = toga.Box(style=box_style, children=[tree, right_container]) 
 
         self.main_window.content = split

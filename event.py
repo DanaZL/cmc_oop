@@ -1,4 +1,5 @@
-from tools import date_compare
+from tools import date_sum, date_compare, is_date_intersection
+from copy import deepcopy
 
 
 class Event():
@@ -10,7 +11,7 @@ class Event():
                  priority,
                  name,
                  frequency,
-                 event_id):
+                 event_id=None):
         """
         frequency:
         Одноразовое - 0; Ежедневное - 1; Еженедельное - 2 
@@ -18,17 +19,20 @@ class Event():
         self.start_time = start_time
         self.duration = duration
         self.end_time = date_sum(start_time, duration)
-
+        self.frequency = frequency
         self.room = room
         self.participants = participants
         self.priority = priority
         self.name = name
-        self.event_id = event_id
+        if event_id is None:
+            self.event_id = -1
+        else:
+            self.event_id = event_id
 
 
     def deploy_frequency(self, experiment_period, cur_time):
         """
-        Разворачиваем событие с учетом периодичности
+        Разворачиваем событие с учетом периодичности и текущего времени
         """
         cur_day = cur_time[0]
         if self.start_time[1] < cur_time[0]:
@@ -52,7 +56,7 @@ class Event():
 
 
     def is_conflict(self, other_event):
-        if is_date_intersetction(self.start_time, self.duration,
+        if is_date_intersection(self.start_time, self.duration,
                                 other_event.start_time, other_event.duration):
             if self.room == other_event.room:
                 return (True, 'room')

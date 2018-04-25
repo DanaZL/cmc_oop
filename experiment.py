@@ -1,7 +1,7 @@
-from tools import date_sum, is_date_intersetction
-from generators import initial_events
-import random as r
+from tools import date_sum, is_date_intersection
+import random
 from copy import deepcopy
+from secretary import Secretary
 
 
 class Experiment():
@@ -13,8 +13,11 @@ class Experiment():
                             for i in range(self.cnt_department)]
 
     def start_experiment(self):
-        self.secretary = Secretary(self.cnt_department)
+        self.secretary = Secretary(self.cnt_department,
+                                    self.cnt_department,
+                                    self.departments)
         self.secretary.generate_init_events()
+        return self.secretary.schedule
 
     def step(self, cnt_step=1):
         self.secretary.step(cnt_step)
@@ -24,6 +27,6 @@ class Experiment():
 class Department():
     def __init__(self, dep_id):
         self.id = dep_id
-        self.cnt_workers = r.choice(range(7))
-        self.workers = [str(self.id) + "." + i for i in range(cnt_workers)]
+        self.cnt_workers = random.choice(range(7))
+        self.workers = [str(self.id) + "." + str(i) for i in range(self.cnt_workers)]
         self.boss = str(self.id) + ".boss"
