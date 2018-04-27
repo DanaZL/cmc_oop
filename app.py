@@ -1,7 +1,7 @@
 import os
 
 import toga
-from toga.constants import COLUMN, ROW
+from toga.constants import COLUMN, ROW, BOLD
 from toga.style.pack import *
 from experiment import Experiment
 from secretary import Secretary
@@ -10,43 +10,27 @@ label_style = Pack(flex=1, padding_right=24)
 box_style = Pack(direction=ROW, padding=5)
 slider_style = Pack(flex=1)
 schedule_style= Pack(flex=1, width=450)
-
-def button_handler(widget):
-    print('button handler')
-    for i in range(0, 10):
-        print("hello", i)
-        yield 1
-    print("done", i)
-
-
-def action0(widget):
-    print("action 0")
-
-
-def action1(widget):
-    print("action 1")
-
-
-def action2(widget):
-    print("action 2")
-
-
-def action3(widget):
-    print("action 3")
-
-def action4(widget):
-    print("CALLING Action 4")
-    cmd3.enabled = not cmd3.enabled
+main_label_style = Pack(flex=1, padding_right=24)
 
 
 class SecretaryApp(toga.App):
+
     def start_experiment(self, widget):
         self.exp_duration.enabled = False
         self.cnt_department.enabled = False
-        self.experiment = Experiment(int(self.cnt_department.value),
-                                    int(self.exp_duration.value))
+
+        self.experiment = Experiment(cnt_department=int(self.cnt_department.value),
+                                    exp_period=int(self.exp_duration.value))
+
         schedule = self.experiment.start_experiment()
-        print(schedule)
+        # print(schedule)
+        self.build_table(schedule)
+
+
+    def step(self, widget):
+        schedule, curtime = self.experiment.step(int(self.exp_step.value.split()[0]))
+        print(dir(self.label_curtime))
+        self.label_curtime.text = "Текущее время: {} день {}.00".format(curtime[0], curtime[1])
         self.build_table(schedule)
 
 
@@ -56,30 +40,23 @@ class SecretaryApp(toga.App):
         self.cricket_icon = os.path.join(path, "icons", "cricket-72.png")
         self.step_icon = os.path.join(path, "")
 
+
     def build_schedule(self):
-        self.tree = toga.Tree(['Номер события', 'Название события', 'Помещение', 'Периодичность', 'Участники'],
+        self.tree = toga.Tree(['Время (День/Часы)', 'Номер события', 'Название события', 'Помещение', 'Периодичность', 'Участники'],
                         style=schedule_style)
-        # print(dir(tree))
-        self.tree.data.append(None, None, None, None,  None,'root1')
-        root2 = self.tree.data.append(None, None,None, None, None, 'root2')
-        self.tree.data.append(root2, None, None, None, None, 'root2.1')
-        root2_2 = self.tree.data.append(root2, None, None, None, None,'root2.2')
-        self.tree.data.append(root2_2, None, None, None, None, 'root2.2.1')
-        self.tree.data.append(root2_2, None, None, None, None, 'root2.2.2')
-        self.tree.data.append(root2_2, None, None, None, None, 'root2.2.3')
         return self.tree
 
+
     def build_table(self, schedule):
-        self.tree.refresh()
-        self.tree = toga.Tree(['Время', 'Номер события', 'Название события',\
-                          'Помещение', 'Периодичность', 'Участники'],
-                        style=schedule_style)
+        for node in self.tree.data[::-1]:
+            self.tree.data.remove(node)
 
         for event in schedule:
+            print (event.start_time, event.duration)
             description = event.get_description()
-            event_row = self.tree.data.append(None, description[0], str(event.event_id),
-                            event.name, str(event.room), description[1], 
-                            "...")
+            event_row = self.tree.data.append(None, description['date'], str(event.event_id),
+                            event.name, description['room'], description['freq'], 
+                            "...\n")
             for worker in event.participants:
                 self.tree.data.append(event_row, "", "", "", "", "", worker)
         print(self.tree)
@@ -89,9 +66,19 @@ class SecretaryApp(toga.App):
     def build_settings(self):
         self.exp_duration = toga.Selection(items=[str(i) for i in range(7, 32)])
         self.cnt_department = toga.Selection(items=[str(i) for i in range(5, 10)])
-        progress = toga.ProgressBar(max=100, value=1, style=Pack(padding_top=20))
+        self.exp_step = toga.Selection(items=[str(i) + " час" for i in range(1, 10)])
 
-        settings_box = toga.Box(
+        self.btn_start_experiment = toga.Button('Начать моделирование', on_press=self.start_experiment, 
+                                style=Pack(flex=1, width=250, alignment='right'))
+
+        self.btn_step = toga.Button('Выполнить шаг моделирования', on_press=self.step, 
+                                style=Pack(flex=1, width=300, height=38))
+
+        self.label_curtime = toga.Label("Текущее время: 0 день 0.00", style=main_label_style)
+
+        progress = toga.ProgressBar(max=100, value=1, style=Pack(padding_top=15))
+
+        self.settings_box = toga.Box(
                 children=[
                     toga.Box(style=box_style, children=[
                         toga.Label("Период моделирования",
@@ -105,25 +92,45 @@ class SecretaryApp(toga.App):
                         self.cnt_department
                     ]),
 
-                    toga.Box(style=box_style, children=[
-                        toga.Label("Шаг моделирования",
-                            style=label_style),
-                        self.cnt_department
-                    ]),
-                    toga.Button('Начать моделирование', on_press=self.start_experiment, 
-                                style=Pack(flex=1, width=250, alignment='right')),
+                    self.btn_start_experiment,
                     progress
                 ],
                 style=Pack(direction=COLUMN, padding=24)
         )
-        return settings_box
+
+        self.step_box = toga.Box(
+                children=[
+                    toga.Box(
+                        children=[
+                            self.label_curtime
+
+                    ]),
+                    toga.Box(
+                        children=[
+                        toga.Label("Шаг моделирования",
+                            style=label_style),
+                        self.exp_step, 
+                        self.btn_step
+                    ],
+                    style=Pack(direction=ROW, padding=14))
+                ],
+                style=Pack(direction=COLUMN, padding=24)
+        )   
+
+        self.content_box = toga.Box(
+                children=[self.settings_box, self.step_box],
+                style=Pack(direction=COLUMN)
+        )
+
+        return self.content_box
+
 
     def startup(self):
         self.icon_init()
-        self.main_window = toga.MainWindow(title=self.name, size=(1500, 900))
+        self.main_window = toga.MainWindow(title=self.name, size=(1800, 800))
 
         self.tree = self.build_schedule()
-        self.tree.refresh()
+        # self.tree.refresh()
         right_container = toga.ScrollContainer(horizontal=False)
 
         # right_container.content = right_content

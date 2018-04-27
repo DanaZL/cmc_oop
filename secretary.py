@@ -17,10 +17,11 @@ class Secretary():
 
 
     def step(self, cnt_step):
-        self.cur_time = date_sum(self.cur_time, (0, self.cnt_step))
+        self.cur_time = date_sum(self.cur_time, (0, cnt_step))
         for event_idx, event in enumerate(self.schedule):
-            end_time = date_sum(event.start_time + event.duration)
-            if date_compare(end_time, self.cur_time) < 0:
+            end_time = date_sum(event.start_time, event.duration)
+            print (end_time, self.cur_time, date_compare(end_time, self.cur_time))
+            if date_compare(end_time, self.cur_time) >= 0:
                 self.schedule.pop(event_idx)
 
 
@@ -71,14 +72,17 @@ class Secretary():
               format(str(ev), str(self))) 
               is_conflict = True
               break
-        if not is_conflict:
-            self.schedule.extend(real_events)
 
-            for i in range(max(self.event_ids) + 2):
+        if not is_conflict:
+            for i in range(1000):
               if i not in self.event_ids:
-                  event_id = i
+                  for ev in real_events:
+                      ev.event_id = i
                   self.event_ids.add(i)
                   break
+
+            self.schedule.extend(real_events)
+
 
 
     def generate_init_events(self):
@@ -92,6 +96,6 @@ class Secretary():
                             participants=self.departments[i].workers + [self.departments[i].boss],
                             priority=1,
                             frequency=1,
-                            name="Ежедневная планерка отдела " + str(self.departments[i].id))
+                            name="Планерка отдела №" + str(self.departments[i].id))
 
         self.sort_schedule()

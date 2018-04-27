@@ -34,6 +34,7 @@ class Event():
         """
         Разворачиваем событие с учетом периодичности и текущего времени
         """
+        print ("EXPERIMENT PERIOD", experiment_period)
         cur_day = cur_time[0]
         if self.start_time[1] < cur_time[0]:
             cur_day += 1
@@ -69,8 +70,9 @@ class Event():
         return self.name
 
     def get_description(self):
-        end_time = date_sum(self.start_time, self.duration)
-        date = "{}день {}.00 -\n {}день {}.00".format(str(self.start_time[0]),
+        self.end_time = date_sum(self.start_time, self.duration)
+
+        date = "{} / {}.00 - {} / {}.00".format(str(self.start_time[0]),
                                               str(self.start_time[1]),
                                               str(self.end_time[0]),
                                               str(self.end_time[1]))
@@ -83,4 +85,5 @@ class Event():
         else:
             freq = "Еженедельное"
 
-        return [date, freq]
+        room = "Комната " + str(self.room)
+        return {"date":date, "freq":freq, "room":room}

@@ -13,15 +13,15 @@ class Experiment():
                             for i in range(self.cnt_department)]
 
     def start_experiment(self):
-        self.secretary = Secretary(self.cnt_department,
-                                    self.cnt_department,
-                                    self.departments)
+        self.secretary = Secretary(cnt_department=self.cnt_department,
+                                    experiment_period=self.experiment_period,
+                                    departments=self.departments)
         self.secretary.generate_init_events()
         return self.secretary.schedule
 
     def step(self, cnt_step=1):
         self.secretary.step(cnt_step)
-        return self.secretary.schedule
+        return self.secretary.schedule, self.secretary.cur_time
 
 
 class Department():
