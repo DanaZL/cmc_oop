@@ -19,10 +19,25 @@ class Experiment():
         self.secretary.generate_init_events()
         return self.secretary.schedule
 
+
     def step(self, cnt_step=1):
         self.secretary.step(cnt_step)
         return self.secretary.schedule, self.secretary.cur_time
 
+    def add_event(self, day, time, duration, room, name, participants):
+        warning = self.secretary.add_event((day, time),
+                                            duration=(duration // 24, duration % 24),
+                                            room=room,
+                                            participants=participants,
+                                            priority=1,
+                                            frequency=0,
+                                            name=name)
+
+        return self.secretary.schedule, warning 
+
+    def delete_event(self, event_id):
+        warning = self.secretary.delete_event(event_id)
+        return self.secretary.schedule, warning
 
 class Department():
     def __init__(self, dep_id):

@@ -29,8 +29,8 @@ def is_date_intersection(start_date_1, duration_1, start_date_2, duration_2):
 	end_1 = start_1 + duration_1[0] * 24 + duration_1[1] 
 	end_2 = start_2 + duration_2[0] * 24 + duration_2[1] 
 
-	if start_1 > start_2 and start_1 > end_2:
+	if start_1 > start_2 and start_1 >= end_2:
 		return False
-	if start_1 < start_2 and end_1 < start_2:
+	if start_1 < start_2 and end_1 <= start_2:
 		return False
 	return True
